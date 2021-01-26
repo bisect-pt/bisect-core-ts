@@ -1,6 +1,6 @@
 {
     "name": "@bisect/bisect-core-ts",
-    "version": "0.0.0",
+    "version": "0.1.0",
     "description": "Common utilities for Typescript projects",
     "author": "Bisect Lda. <info@bisect.pt> (www.bisect.pt)",
     "contributors": [
