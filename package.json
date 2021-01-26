@@ -17,7 +17,7 @@
         "**/*"
     ],
     "scripts": {
-        "build": "npm run clean && npm run compile",
+        "build": "yarn run clean && yarn run compile",
         "clean": "rm -rf ./dist",
         "compile": "tsc"
     },
