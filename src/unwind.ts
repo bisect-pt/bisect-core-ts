@@ -7,6 +7,10 @@ export class Unwinder {
         this.actions.unshift(action);
     }
 
+    public reset(): void {
+        this.actions = [];
+    }
+
     public unwind(): void {
         this.actions.forEach((action) => action());
         this.actions = [];
