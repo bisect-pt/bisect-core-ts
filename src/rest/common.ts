@@ -4,6 +4,8 @@ import https from 'https';
 import { StringDecoder } from 'string_decoder';
 import { createUrl } from '../utils/platform';
 import axios from 'axios';
+import logger from '../logger';
+
 // ////////////////////////////////////////////////////////////////////////////
 
 export type TokenGetter = () => string;
@@ -109,7 +111,7 @@ const handleHttpJSONResponse = (res: http.IncomingMessage, resolve: resolver, re
 
 export async function post(baseUrl: string, authToken: string | null, endpoint: string, data: object): Promise<any> {
     const payload: string = JSON.stringify(data);
-
+    // logger.info(`BaseURL: ${baseUrl}`);
     const headers: http.OutgoingHttpHeaders = {
         'Content-Length': Buffer.byteLength(payload),
         'Content-Type': 'application/json;charset=UTF-8',
