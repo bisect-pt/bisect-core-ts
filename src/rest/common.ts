@@ -191,10 +191,14 @@ export async function putForm(
     const form = new XFormData();
     entries.forEach((entry) => form.append(entry.name, entry.value));
 
+    const agent = new https.Agent({
+        rejectUnauthorized: false,
+    });
     const config = {
         headers: {
             Authorization: `Bearer ${authToken}`,
         },
+        httpsAgent: agent,
         onUploadProgress: (progressEvent: any) => {
             const percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
 
