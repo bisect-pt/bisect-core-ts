@@ -24,9 +24,8 @@ export class Transport {
         return this.rest.del(endpoint);
     }
 
-    public async downloadPcap(endpoint: string) {
-        console.log('tranport', endpoint);
-        return this.rest.downloadPcap(endpoint);
+    public async download(endpoint: string) {
+        return this.rest.download(endpoint);
     }
 
     // Returns a promise which resolves to:

@@ -209,39 +209,9 @@ export async function putForm(
     } catch (err) {
         console.error(err);
     }
-
-    // return new Promise((resolve, reject): void => {
-    //     const form = new FormData();
-
-    //     entries.forEach(entry => form.append(entry.name, entry.value));
-
-    //     const headers: http.OutgoingHttpHeaders = {
-    //         ...form.getHeaders(),
-    //     };
-
-    //     if (authToken !== null) {
-    //         headers.Authorization = `Bearer ${authToken}`;
-    //     }
-
-    //     const options: IRequestOptionsExt = {
-    //         headers,
-    //         method: 'PUT',
-    //         rejectUnauthorized: false,
-    //     };
-
-    //     const callback = (res: http.IncomingMessage): void => handleHttpJSONResponse(res, resolve, reject);
-    //     const req: http.ClientRequest = makeRequest(`${baseUrl}${endpoint}`, options, callback);
-    //     form.pipe(req);
-    //     req.on('error', err => {
-    //         logger.error(`req.on('error') ${JSON.stringify(err)}`);
-    //         reject(err);
-    //     });
-    //     req.on('response', res => handleHttpJSONResponse(res, resolve, reject));
-    // });
 }
 
-export async function downloadPcap(baseUrl: string, authToken: string | null, endpoint: string): Promise<any> {
-    console.log(baseUrl, endpoint);
+export async function download(baseUrl: string, authToken: string | null, endpoint: string): Promise<any> {
     const config: any = {
         responseType: 'blob',
         headers: {
