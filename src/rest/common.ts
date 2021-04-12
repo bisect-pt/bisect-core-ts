@@ -4,6 +4,8 @@ import https from 'https';
 import { StringDecoder } from 'string_decoder';
 import { createUrl } from '../utils/platform';
 import axios from 'axios';
+import logger from '../logger';
+
 // ////////////////////////////////////////////////////////////////////////////
 
 export type TokenGetter = () => string;
@@ -189,10 +191,14 @@ export async function putForm(
     const form = new XFormData();
     entries.forEach((entry) => form.append(entry.name, entry.value));
 
+    const agent = new https.Agent({
+        rejectUnauthorized: false,
+    });
     const config = {
         headers: {
             Authorization: `Bearer ${authToken}`,
         },
+        httpsAgent: agent,
         onUploadProgress: (progressEvent: any) => {
             const percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
 
@@ -209,35 +215,6 @@ export async function putForm(
     } catch (err) {
         console.error(err);
     }
-
-    // return new Promise((resolve, reject): void => {
-    //     const form = new FormData();
-
-    //     entries.forEach(entry => form.append(entry.name, entry.value));
-
-    //     const headers: http.OutgoingHttpHeaders = {
-    //         ...form.getHeaders(),
-    //     };
-
-    //     if (authToken !== null) {
-    //         headers.Authorization = `Bearer ${authToken}`;
-    //     }
-
-    //     const options: IRequestOptionsExt = {
-    //         headers,
-    //         method: 'PUT',
-    //         rejectUnauthorized: false,
-    //     };
-
-    //     const callback = (res: http.IncomingMessage): void => handleHttpJSONResponse(res, resolve, reject);
-    //     const req: http.ClientRequest = makeRequest(`${baseUrl}${endpoint}`, options, callback);
-    //     form.pipe(req);
-    //     req.on('error', err => {
-    //         logger.error(`req.on('error') ${JSON.stringify(err)}`);
-    //         reject(err);
-    //     });
-    //     req.on('response', res => handleHttpJSONResponse(res, resolve, reject));
-    // });
 }
 
 export async function del(baseUrl: string, authToken: string, endpoint: string): Promise<void> {

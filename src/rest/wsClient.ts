@@ -1,5 +1,5 @@
 import SocketIOClient from 'socket.io-client';
-import { logger } from '../logger';
+import logger from '../logger';
 
 // ////////////////////////////////////////////////////////////////////////////
 
