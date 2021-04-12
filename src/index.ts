@@ -1,5 +1,5 @@
 export { Unwinder } from './unwind';
-export * from './types';
+export { Duration, IDuration } from './types';
 import logger from './logger';
 export { sleepFor } from './sleep';
 
