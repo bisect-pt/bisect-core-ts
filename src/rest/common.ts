@@ -189,7 +189,7 @@ export async function putForm(
     callback?: UploadProgressCallback
 ): Promise<any> {
     const form = new XFormData();
-    entries.forEach((entry) => form.append(entry.name, entry.value));
+    entries.forEach(entry => form.append(entry.name, entry.value));
 
     const agent = new https.Agent({
         rejectUnauthorized: false,
@@ -217,6 +217,20 @@ export async function putForm(
     }
 }
 
+export async function download(baseUrl: string, authToken: string | null, endpoint: string): Promise<any> {
+    const config: any = {
+        responseType: 'blob',
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        },
+    };
+    try {
+        const response = await axios.get(`${baseUrl}${endpoint}`, config);
+        return response;
+    } catch (err) {
+        console.error(err);
+    }
+}
 export async function del(baseUrl: string, authToken: string, endpoint: string): Promise<void> {
     const headers: http.OutgoingHttpHeaders = {
         Authorization: `Bearer ${authToken}`,

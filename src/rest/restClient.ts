@@ -8,6 +8,7 @@ import {
     TokenGetter,
     UploadProgressCallback,
     makeAwaiter,
+    download,
 } from './common';
 
 export class RestClient {
@@ -35,6 +36,9 @@ export class RestClient {
 
     public async del(endpoint: string) {
         return del(this.baseUrl, this.tokenGetter(), endpoint);
+    }
+    public async download(endpoint: string) {
+        return download(this.baseUrl, this.tokenGetter(), endpoint);
     }
 
     public makeAwaiter<TResponse>(
