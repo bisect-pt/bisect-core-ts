@@ -1,9 +1,11 @@
-import XFormData from 'form-data';
+import FormData from 'form-data';
 import http from 'http';
 import https from 'https';
 import { StringDecoder } from 'string_decoder';
 import { createUrl } from '../utils/platform';
 import axios from 'axios';
+import logger from '../logger';
+
 // ////////////////////////////////////////////////////////////////////////////
 
 export type TokenGetter = () => string;
@@ -186,13 +188,16 @@ export async function putForm(
     entries: IPutEntry[],
     callback?: UploadProgressCallback
 ): Promise<any> {
-    const form = new XFormData();
+    const form = new FormData();
     entries.forEach(entry => form.append(entry.name, entry.value));
 
+    const agent = new https.Agent({
+        rejectUnauthorized: false,
+    });
     const config = {
-        headers: {
-            Authorization: `Bearer ${authToken}`,
-        },
+        headers: { ...form.getHeaders(), Authorization: `Bearer ${authToken}` },
+        httpsAgent: agent,
+        maxContentLength: Infinity,
         onUploadProgress: (progressEvent: any) => {
             const percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
 
@@ -205,22 +210,7 @@ export async function putForm(
 
     try {
         const response = await axios.put(`${baseUrl}${endpoint}`, form, config);
-        return response;
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-export async function download(baseUrl: string, authToken: string | null, endpoint: string): Promise<any> {
-    const config: any = {
-        responseType: 'blob',
-        headers: {
-            Authorization: `Bearer ${authToken}`,
-        },
-    };
-    try {
-        const response = await axios.get(`${baseUrl}${endpoint}`, config);
-        return response;
+        return response.data;
     } catch (err) {
         console.error(err);
     }
@@ -241,6 +231,20 @@ export async function patch(baseUrl: string, authToken: string | null, endpoint:
     }
 }
 
+export async function download(baseUrl: string, authToken: string | null, endpoint: string): Promise<any> {
+    const config: any = {
+        responseType: 'blob',
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        },
+    };
+    try {
+        const response = await axios.get(`${baseUrl}${endpoint}`, config);
+        return response;
+    } catch (err) {
+        console.error(err);
+    }
+}
 export async function del(baseUrl: string, authToken: string, endpoint: string): Promise<void> {
     const headers: http.OutgoingHttpHeaders = {
         Authorization: `Bearer ${authToken}`,
@@ -264,6 +268,7 @@ export interface IWSMessage {
     event: string;
     data: any;
 }
+
 // Returns a promise which resolves to:
 // - the value returned by condition, if succeeded
 // - undefined, if timeout

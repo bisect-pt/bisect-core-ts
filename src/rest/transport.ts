@@ -27,6 +27,7 @@ export class Transport {
     public async download(endpoint: string) {
         return this.rest.download(endpoint);
     }
+
     public async patch(endpoint: string, value: any) {
         return this.rest.patch(endpoint, value);
     }
