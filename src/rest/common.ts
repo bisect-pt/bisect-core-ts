@@ -225,6 +225,22 @@ export async function download(baseUrl: string, authToken: string | null, endpoi
         console.error(err);
     }
 }
+
+export async function patch(baseUrl: string, authToken: string | null, endpoint: string, value: any): Promise<any> {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        },
+    };
+
+    try {
+        const response = await axios.patch(`${baseUrl}${endpoint}`, value, config);
+        return response;
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 export async function del(baseUrl: string, authToken: string, endpoint: string): Promise<void> {
     const headers: http.OutgoingHttpHeaders = {
         Authorization: `Bearer ${authToken}`,
