@@ -189,7 +189,7 @@ export async function putForm(
     callback?: UploadProgressCallback
 ): Promise<any> {
     const form = new FormData();
-    entries.forEach((entry) => form.append(entry.name, entry.value));
+    entries.forEach(entry => form.append(entry.name, entry.value));
 
     const agent = new https.Agent({
         rejectUnauthorized: false,
@@ -211,6 +211,21 @@ export async function putForm(
     try {
         const response = await axios.put(`${baseUrl}${endpoint}`, form, config);
         return response.data;
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+export async function patch(baseUrl: string, authToken: string | null, endpoint: string, value: any): Promise<any> {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        },
+    };
+
+    try {
+        const response = await axios.patch(`${baseUrl}${endpoint}`, value, config);
+        return response;
     } catch (err) {
         console.error(err);
     }
