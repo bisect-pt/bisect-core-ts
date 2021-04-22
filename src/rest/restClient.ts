@@ -10,6 +10,7 @@ import {
     makeAwaiter,
     download,
     patch,
+    put,
 } from './common';
 
 export class RestClient {
@@ -44,6 +45,10 @@ export class RestClient {
 
     public async patch(endpoint: string, value: any) {
         return patch(this.baseUrl, this.tokenGetter(), endpoint, value);
+    }
+
+    public async put(endpoint: string, value: any) {
+        return put(this.baseUrl, this.tokenGetter(), endpoint, value);
     }
 
     public makeAwaiter<TResponse>(
