@@ -24,6 +24,14 @@ export class Transport {
         return this.rest.del(endpoint);
     }
 
+    public async download(endpoint: string) {
+        return this.rest.download(endpoint);
+    }
+
+    public async patch(endpoint: string, value: any) {
+        return this.rest.patch(endpoint, value);
+    }
+
     // Returns a promise which resolves to:
     // - the event, if succeeded
     // - undefined, if timeout
