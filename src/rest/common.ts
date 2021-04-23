@@ -189,7 +189,7 @@ export async function putForm(
     callback?: UploadProgressCallback
 ): Promise<any> {
     const form = new FormData();
-    entries.forEach(entry => form.append(entry.name, entry.value));
+    entries.forEach((entry) => form.append(entry.name, entry.value));
 
     const agent = new https.Agent({
         rejectUnauthorized: false,
@@ -228,6 +228,27 @@ export async function patch(baseUrl: string, authToken: string | null, endpoint:
         return response;
     } catch (err) {
         console.error(err);
+    }
+}
+
+export async function put(baseUrl: string, authToken: string | null, endpoint: string, value: any): Promise<any> {
+    const agent = new https.Agent({
+        rejectUnauthorized: false,
+    });
+
+    const config = {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        },
+        httpsAgent: agent,
+    };
+
+    try {
+        const response = await axios.put(`${baseUrl}${endpoint}`, value, config);
+        return validateResponseCode(response.data);
+    } catch (err) {
+        console.error(err);
+        throw err;
     }
 }
 
@@ -306,13 +327,14 @@ export function makeAwaiter<TResponse>(
 declare interface IResponseBase {
     result: number;
     success: boolean;
+    content: unknown;
 }
 
 function isResponse(object: any): object is IResponseBase {
     return 'result' in object || 'success' in object;
 }
 
-export const validateResponseCode = (res: any): void => {
+export const validateResponseCode = (res: unknown): unknown => {
     if (!res) {
         throw new Error(`Failed: ${JSON.stringify(res)}`);
     }
@@ -321,11 +343,12 @@ export const validateResponseCode = (res: any): void => {
         throw new Error(`Failed: ${JSON.stringify(res)}`);
     }
 
-    const r: IResponseBase = res as IResponseBase;
+    const r: IResponseBase = res;
 
     if (r.result !== 0 && r.success !== true) {
         throw new Error(`Failed: ${JSON.stringify(res)}`);
     }
+    return res.content;
 };
 
 export interface IWSMessage {

@@ -32,6 +32,10 @@ export class Transport {
         return this.rest.patch(endpoint, value);
     }
 
+    public async put(endpoint: string, value: any) {
+        return this.rest.put(endpoint, value);
+    }
+
     // Returns a promise which resolves to:
     // - the event, if succeeded
     // - undefined, if timeout
