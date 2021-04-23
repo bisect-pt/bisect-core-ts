@@ -2,8 +2,7 @@ import { IPutEntry, UploadProgressCallback } from './common';
 import { RestClient } from './restClient';
 
 export class Transport {
-    public constructor(public readonly rest: RestClient, private readonly wsGetter: () => SocketIOClient.Socket ) {}
-    
+    public constructor(public readonly rest: RestClient, private readonly wsGetter: () => SocketIOClient.Socket) {}
 
     public async get(endpoint: string) {
         return this.rest.get(endpoint);
@@ -28,9 +27,11 @@ export class Transport {
     // Returns a promise which resolves to:
     // - the event, if succeeded
     // - undefined, if timeout
-    public makeAwaiter<TResponse>(eventName: string,
-        condition: (data: any) => TResponse | false,
-        timeoutMs: number): Promise<TResponse | undefined> {
+    public makeAwaiter<TResponse>(
+        eventName: string,
+        condition: (data: any) => TResponse | undefined,
+        timeoutMs: number
+    ): Promise<TResponse | undefined> {
         return this.rest.makeAwaiter(this.wsGetter(), eventName, condition, timeoutMs);
     }
 }

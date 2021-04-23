@@ -40,7 +40,7 @@ export class RestClient {
     public makeAwaiter<TResponse>(
         ws: SocketIOClient.Socket,
         eventName: string,
-        condition: (data: any) => TResponse | false,
+        condition: (data: any) => TResponse | undefined,
         timeoutMs: number
     ): Promise<TResponse | undefined> {
         return makeAwaiter(ws, eventName, condition, timeoutMs);
