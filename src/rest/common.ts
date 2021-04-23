@@ -260,12 +260,14 @@ export function makeAwaiter<TResponse>(
             if (msg.event !== eventName) {
                 return;
             }
-            const result = condition(msg.data);
-            if (result) {
-                clearTimeout(timer);
-                ws.off('message', callback);
-                resolve(result);
+            const result: TResponse | false = condition(msg.data);
+            if (result === false) {
+                return;
             }
+
+            clearTimeout(timer);
+            ws.off('message', callback);
+            resolve(result);
         };
 
         ws.on('message', callback);

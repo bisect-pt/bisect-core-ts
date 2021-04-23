@@ -47,13 +47,6 @@ export class RestClient {
     }
 
     public getAuthUrl(path: string) {
-        // const url = createUrl(path);
-
-        // const token = this.tokenGetter();
-        // url.searchParams.append('token', `Bearer ${token}`);
-
-        // return url;
-
         const token = this.tokenGetter();
 
         if (path.includes('?')) {
