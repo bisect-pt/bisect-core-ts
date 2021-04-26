@@ -41,7 +41,7 @@ export class Transport {
     // - undefined, if timeout
     public makeAwaiter<TResponse>(
         eventName: string,
-        condition: (data: any) => TResponse | false,
+        condition: (data: any) => TResponse | undefined,
         timeoutMs: number
     ): Promise<TResponse | undefined> {
         return this.rest.makeAwaiter(this.wsGetter(), eventName, condition, timeoutMs);

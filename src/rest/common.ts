@@ -293,11 +293,11 @@ export interface IWSMessage {
 // Returns a promise which resolves to:
 // - the value returned by condition, if succeeded
 // - undefined, if timeout
-// condition should return a truthy value to indicate that the event is accepted.
+// condition should return anything other than undefined to indicate that the event is accepted.
 export function makeAwaiter<TResponse>(
     ws: SocketIOClient.Socket,
     eventName: string,
-    condition: (data: any) => TResponse | false,
+    condition: (data: any) => TResponse | undefined,
     timeoutMs: number
 ): Promise<TResponse | undefined> {
     return new Promise((resolve, reject) => {
@@ -310,12 +310,14 @@ export function makeAwaiter<TResponse>(
             if (msg.event !== eventName) {
                 return;
             }
-            const result = condition(msg.data);
-            if (result) {
-                clearTimeout(timer);
-                ws.off('message', callback);
-                resolve(result);
+            const result: TResponse | undefined = condition(msg.data);
+            if (result === undefined) {
+                return;
             }
+
+            clearTimeout(timer);
+            ws.off('message', callback);
+            resolve(result);
         };
 
         ws.on('message', callback);

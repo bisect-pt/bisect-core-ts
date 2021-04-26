@@ -54,20 +54,13 @@ export class RestClient {
     public makeAwaiter<TResponse>(
         ws: SocketIOClient.Socket,
         eventName: string,
-        condition: (data: any) => TResponse | false,
+        condition: (data: any) => TResponse | undefined,
         timeoutMs: number
     ): Promise<TResponse | undefined> {
         return makeAwaiter(ws, eventName, condition, timeoutMs);
     }
 
     public getAuthUrl(path: string) {
-        // const url = createUrl(path);
-
-        // const token = this.tokenGetter();
-        // url.searchParams.append('token', `Bearer ${token}`);
-
-        // return url;
-
         const token = this.tokenGetter();
 
         if (path.includes('?')) {
