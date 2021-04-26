@@ -253,11 +253,16 @@ export async function put(baseUrl: string, authToken: string | null, endpoint: s
 }
 
 export async function download(baseUrl: string, authToken: string | null, endpoint: string): Promise<any> {
+    const agent = new https.Agent({
+        rejectUnauthorized: false,
+    });
+
     const config: any = {
         responseType: 'blob',
         headers: {
             Authorization: `Bearer ${authToken}`,
         },
+        httpsAgent: agent,
     };
     try {
         const response = await axios.get(`${baseUrl}${endpoint}`, config);
