@@ -16,3 +16,23 @@ export class Unwinder {
         this.actions = [];
     }
 }
+
+type AsyncUnwindAction = () => Promise<void>;
+
+export class AsyncUnwinder {
+    private actions: AsyncUnwindAction[] = [];
+
+    public add(action: AsyncUnwindAction) {
+        this.actions.unshift(action);
+    }
+
+    public reset(): void {
+        this.actions = [];
+    }
+
+    public async unwind(): Promise<void> {
+        const promises = this.actions.map(async (action) => await action());
+        await Promise.all(promises);
+        this.actions = [];
+    }
+}
