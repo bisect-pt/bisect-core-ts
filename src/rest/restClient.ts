@@ -9,6 +9,7 @@ import {
     UploadProgressCallback,
     makeAwaiter,
     download,
+    downloadFile,
     patch,
     put,
 } from './common';
@@ -41,6 +42,10 @@ export class RestClient {
     }
     public async download(endpoint: string) {
         return download(this.baseUrl, this.tokenGetter(), endpoint);
+    }
+
+    public async downloadFile(endpoint: string, outputLocationPath: string) {
+        return downloadFile(this.baseUrl, this.tokenGetter(), endpoint, outputLocationPath);
     }
 
     public async patch(endpoint: string, value: any) {
