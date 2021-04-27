@@ -5,6 +5,9 @@ import { StringDecoder } from 'string_decoder';
 import { createUrl } from '../utils/platform';
 import axios from 'axios';
 import logger from '../logger';
+import * as stream from 'stream';
+import { promisify } from 'util';
+import fs from 'fs';
 
 // ////////////////////////////////////////////////////////////////////////////
 
@@ -271,6 +274,35 @@ export async function download(baseUrl: string, authToken: string | null, endpoi
         console.error(err);
     }
 }
+
+const finished = promisify(stream.finished);
+
+export async function downloadFile(
+    baseUrl: string,
+    authToken: string | null,
+    endpoint: string,
+    outputLocationPath: string
+): Promise<any> {
+    const agent = new https.Agent({
+        rejectUnauthorized: false,
+    });
+    const config: any = {
+        responseType: 'stream',
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        },
+        httpsAgent: agent,
+    };
+    const writer = fs.createWriteStream(outputLocationPath);
+    try {
+        const response = await axios.get(`${baseUrl}${endpoint}`, config);
+        response.data.pipe(writer);
+        return finished(writer); //this is a Promise
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 export async function del(baseUrl: string, authToken: string, endpoint: string): Promise<void> {
     const headers: http.OutgoingHttpHeaders = {
         Authorization: `Bearer ${authToken}`,
