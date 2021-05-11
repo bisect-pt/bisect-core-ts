@@ -44,8 +44,8 @@ export class RestClient {
         return download(this.baseUrl, this.tokenGetter(), endpoint);
     }
 
-    public async downloadFile(endpoint: string, stream: any) {
-        return downloadFile(this.baseUrl, this.tokenGetter(), endpoint, stream);
+    public async downloadFile(endpoint: string, outputStream: any) {
+        return downloadFile(this.baseUrl, this.tokenGetter(), endpoint, outputStream);
     }
 
     public async patch(endpoint: string, value: any) {
