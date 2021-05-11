@@ -7,7 +7,6 @@ import axios from 'axios';
 import logger from '../logger';
 import * as stream from 'stream';
 import { promisify } from 'util';
-import fs from 'fs';
 
 // ////////////////////////////////////////////////////////////////////////////
 
@@ -281,7 +280,7 @@ export async function downloadFile(
     baseUrl: string,
     authToken: string | null,
     endpoint: string,
-    outputLocationPath: string
+    stream: any
 ): Promise<any> {
     const agent = new https.Agent({
         rejectUnauthorized: false,
@@ -293,11 +292,10 @@ export async function downloadFile(
         },
         httpsAgent: agent,
     };
-    const writer = fs.createWriteStream(outputLocationPath);
     try {
         const response = await axios.get(`${baseUrl}${endpoint}`, config);
-        response.data.pipe(writer);
-        return finished(writer); //this is a Promise
+        response.data.pipe(stream);
+        return finished(stream); //this is a Promise
     } catch (err) {
         console.error(err);
     }
@@ -387,8 +385,3 @@ export const validateResponseCode = (res: unknown): unknown => {
     }
     return res.content;
 };
-
-export interface IWSMessage {
-    event: string;
-    data: any;
-}
