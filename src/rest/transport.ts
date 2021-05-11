@@ -28,8 +28,8 @@ export class Transport {
         return this.rest.download(endpoint);
     }
 
-    public async downloadFile(endpoint: string, outputLocationPath: string) {
-        return this.rest.downloadFile(endpoint, outputLocationPath);
+    public async downloadFile(endpoint: string, outputStream: any) {
+        return this.rest.downloadFile(endpoint, outputStream);
     }
 
     public async patch(endpoint: string, value: any) {

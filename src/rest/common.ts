@@ -6,8 +6,6 @@ import { createUrl } from '../utils/platform';
 import axios from 'axios';
 import logger from '../logger';
 import * as stream from 'stream';
-import { promisify } from 'util';
-import fs from 'fs';
 
 // ////////////////////////////////////////////////////////////////////////////
 
@@ -192,7 +190,7 @@ export async function putForm(
     callback?: UploadProgressCallback
 ): Promise<any> {
     const form = new FormData();
-    entries.forEach((entry) => form.append(entry.name, entry.value));
+    entries.forEach(entry => form.append(entry.name, entry.value));
 
     const agent = new https.Agent({
         rejectUnauthorized: false,
@@ -275,13 +273,11 @@ export async function download(baseUrl: string, authToken: string | null, endpoi
     }
 }
 
-const finished = promisify(stream.finished);
-
 export async function downloadFile(
     baseUrl: string,
     authToken: string | null,
     endpoint: string,
-    outputLocationPath: string
+    outputStream: any
 ): Promise<any> {
     const agent = new https.Agent({
         rejectUnauthorized: false,
@@ -293,11 +289,18 @@ export async function downloadFile(
         },
         httpsAgent: agent,
     };
-    const writer = fs.createWriteStream(outputLocationPath);
     try {
         const response = await axios.get(`${baseUrl}${endpoint}`, config);
-        response.data.pipe(writer);
-        return finished(writer); //this is a Promise
+        response.data.pipe(outputStream);
+        return new Promise((resolve: any, reject: any) => {
+            stream.finished(outputStream, (err: any) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
     } catch (err) {
         console.error(err);
     }
@@ -387,8 +390,3 @@ export const validateResponseCode = (res: unknown): unknown => {
     }
     return res.content;
 };
-
-export interface IWSMessage {
-    event: string;
-    data: any;
-}
