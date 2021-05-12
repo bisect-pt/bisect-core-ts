@@ -2,7 +2,7 @@ import FormData from 'form-data';
 import http from 'http';
 import https from 'https';
 import { StringDecoder } from 'string_decoder';
-import { createUrl } from '../utils/platform';
+import { createUrl, isBrowser } from '../utils/platform';
 import axios from 'axios';
 import logger from '../logger';
 import * as stream from 'stream';
@@ -195,13 +195,15 @@ export async function putForm(
     const agent = new https.Agent({
         rejectUnauthorized: false,
     });
+
     const config = {
-        headers: { ...form.getHeaders(), Authorization: `Bearer ${authToken}` },
+        headers: isBrowser()
+            ? { Authorization: `Bearer ${authToken}` }
+            : { ...form.getHeaders(), Authorization: `Bearer ${authToken}` },
         httpsAgent: agent,
         maxContentLength: Infinity,
         onUploadProgress: (progressEvent: any) => {
             const percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-
             const info = { percentage: percentCompleted };
             if (callback) {
                 callback(info);
