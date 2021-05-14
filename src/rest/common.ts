@@ -248,6 +248,10 @@ export async function put(baseUrl: string, authToken: string | null, endpoint: s
 
     try {
         const response = await axios.put(`${baseUrl}${endpoint}`, value, config);
+        //For put in settings of list
+        if (response.status === 200) {
+            return response;
+        }
         return validateResponseCode(response.data);
     } catch (err) {
         console.error(err);
