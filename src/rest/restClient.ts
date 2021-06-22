@@ -15,45 +15,49 @@ import {
 } from './common';
 
 export class RestClient {
-    public constructor(private readonly baseUrl: string, private readonly tokenGetter: TokenGetter) {}
+    public constructor(
+        private readonly baseUrl: string,
+        private readonly tokenGetter: TokenGetter,
+        private readonly unauthorizedResponse: (code: number | undefined) => boolean
+    ) {}
 
     public async get(endpoint: string) {
-        return get(this.baseUrl, this.tokenGetter(), endpoint);
+        return get(this.baseUrl, this.tokenGetter(), endpoint, this.unauthorizedResponse);
     }
 
     public async getText(endpoint: string) {
-        return getText(this.baseUrl, this.tokenGetter(), endpoint);
+        return getText(this.baseUrl, this.tokenGetter(), endpoint, this.unauthorizedResponse);
     }
 
     public async post(endpoint: string, data: object) {
-        return post(this.baseUrl, this.tokenGetter(), endpoint, data);
+        return post(this.baseUrl, this.tokenGetter(), endpoint, data, this.unauthorizedResponse);
     }
 
     public async postBase(endpoint: string, data: object) {
-        return post(this.baseUrl, this.tokenGetter(), endpoint, data);
+        return post(this.baseUrl, this.tokenGetter(), endpoint, data, this.unauthorizedResponse);
     }
 
     public async putForm(endpoint: string, entries: IPutEntry[], callback?: UploadProgressCallback): Promise<any> {
-        return await putForm(this.baseUrl, this.tokenGetter(), endpoint, entries, callback);
+        return await putForm(this.baseUrl, this.tokenGetter(), endpoint, entries, callback, this.unauthorizedResponse);
     }
 
     public async del(endpoint: string) {
-        return del(this.baseUrl, this.tokenGetter(), endpoint);
+        return del(this.baseUrl, this.tokenGetter(), endpoint, this.unauthorizedResponse);
     }
     public async download(endpoint: string) {
-        return download(this.baseUrl, this.tokenGetter(), endpoint);
+        return download(this.baseUrl, this.tokenGetter(), endpoint, this.unauthorizedResponse);
     }
 
     public async downloadFile(endpoint: string, outputStream: any) {
-        return downloadFile(this.baseUrl, this.tokenGetter(), endpoint, outputStream);
+        return downloadFile(this.baseUrl, this.tokenGetter(), endpoint, outputStream, this.unauthorizedResponse);
     }
 
     public async patch(endpoint: string, value: any) {
-        return patch(this.baseUrl, this.tokenGetter(), endpoint, value);
+        return patch(this.baseUrl, this.tokenGetter(), endpoint, value, this.unauthorizedResponse);
     }
 
     public async put(endpoint: string, value: any) {
-        return put(this.baseUrl, this.tokenGetter(), endpoint, value);
+        return put(this.baseUrl, this.tokenGetter(), endpoint, value, this.unauthorizedResponse);
     }
 
     public makeAwaiter<TResponse>(
