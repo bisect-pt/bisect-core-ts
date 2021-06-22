@@ -1,4 +1,4 @@
-import FormData, { listenerCount } from 'form-data';
+import FormData from 'form-data';
 import http from 'http';
 import https from 'https';
 import { StringDecoder } from 'string_decoder';
@@ -6,7 +6,6 @@ import { createUrl, isBrowser } from '../utils/platform';
 import axios from 'axios';
 import logger from '../logger';
 import * as stream from 'stream';
-import { CLIENT_RENEG_WINDOW } from 'tls';
 
 // ////////////////////////////////////////////////////////////////////////////
 
