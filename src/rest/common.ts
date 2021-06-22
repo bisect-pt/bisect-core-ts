@@ -1,4 +1,4 @@
-import FormData from 'form-data';
+import FormData, { listenerCount } from 'form-data';
 import http from 'http';
 import https from 'https';
 import { StringDecoder } from 'string_decoder';
@@ -6,6 +6,7 @@ import { createUrl, isBrowser } from '../utils/platform';
 import axios from 'axios';
 import logger from '../logger';
 import * as stream from 'stream';
+import { CLIENT_RENEG_WINDOW } from 'tls';
 
 // ////////////////////////////////////////////////////////////////////////////
 
@@ -72,9 +73,16 @@ interface IResponseHandler {
     handlePayload: (payload: string) => void;
 }
 
-const handleHttpCommonResponse = (res: http.IncomingMessage, handler: IResponseHandler): void => {
+const handleHttpCommonResponse = (
+    res: http.IncomingMessage,
+    handler: IResponseHandler,
+    unauthorizedResponse?: (code: number | undefined) => boolean
+): void => {
     if (!checkStatusCode(res.statusCode)) {
         handler.handleError(new TransportError(res));
+    }
+    if (unauthorizedResponse) {
+        unauthorizedResponse(res.statusCode);
     }
 
     let body = '';
@@ -88,29 +96,53 @@ const handleHttpCommonResponse = (res: http.IncomingMessage, handler: IResponseH
     res.on('error', (err: any) => handler.handleError(err as Error));
 };
 
-const handleHttpTextResponse = (res: http.IncomingMessage, resolve: resolver, reject: rejector): void =>
-    handleHttpCommonResponse(res, {
-        handleError: (err: Error) => reject(err),
-        handlePayload: (payload: string) => resolve(payload),
-    });
-
-const handleHttpJSONResponse = (res: http.IncomingMessage, resolve: resolver, reject: rejector): void =>
-    handleHttpCommonResponse(res, {
-        handleError: (err: Error) => reject(err),
-        handlePayload: (body: string) => {
-            if (body === '') {
-                resolve({});
-            } else {
-                try {
-                    resolve(JSON.parse(body));
-                } catch (err) {
-                    reject(err);
-                }
-            }
+const handleHttpTextResponse = (
+    res: http.IncomingMessage,
+    resolve: resolver,
+    reject: rejector,
+    unauthorizedResponse?: (code: number | undefined) => boolean
+): void =>
+    handleHttpCommonResponse(
+        res,
+        {
+            handleError: (err: Error) => reject(err),
+            handlePayload: (payload: string) => resolve(payload),
         },
-    });
+        unauthorizedResponse
+    );
 
-export async function post(baseUrl: string, authToken: string | null, endpoint: string, data: object): Promise<any> {
+const handleHttpJSONResponse = (
+    res: http.IncomingMessage,
+    resolve: resolver,
+    reject: rejector,
+    unauthorizedResponse?: (code: number | undefined) => boolean
+): void =>
+    handleHttpCommonResponse(
+        res,
+        {
+            handleError: (err: Error) => reject(err),
+            handlePayload: (body: string) => {
+                if (body === '') {
+                    resolve({});
+                } else {
+                    try {
+                        resolve(JSON.parse(body));
+                    } catch (err) {
+                        reject(err);
+                    }
+                }
+            },
+        },
+        unauthorizedResponse
+    );
+
+export async function post(
+    baseUrl: string,
+    authToken: string | null,
+    endpoint: string,
+    data: object,
+    unauthorizedResponse?: (code: number | undefined) => boolean
+): Promise<any> {
     const payload: string = JSON.stringify(data);
 
     const headers: http.OutgoingHttpHeaders = {
@@ -129,7 +161,8 @@ export async function post(baseUrl: string, authToken: string | null, endpoint: 
     };
 
     return new Promise((resolve, reject): void => {
-        const callback = (res: http.IncomingMessage): void => handleHttpJSONResponse(res, resolve, reject);
+        const callback = (res: http.IncomingMessage): void =>
+            handleHttpJSONResponse(res, resolve, reject, unauthorizedResponse);
         const req: http.ClientRequest = makeRequest(`${baseUrl}${endpoint}`, options, callback);
         req.on('error', reject);
         req.write(payload);
@@ -137,13 +170,19 @@ export async function post(baseUrl: string, authToken: string | null, endpoint: 
     });
 }
 
-type ResponseHandler = (res: http.IncomingMessage, resolve: resolver, reject: rejector) => void;
+type ResponseHandler = (
+    res: http.IncomingMessage,
+    resolve: resolver,
+    reject: rejector,
+    unauthorizedResponse?: (code: number | undefined) => boolean
+) => void;
 
 export async function getCommon(
     baseUrl: string,
     authToken: string,
     endpoint: string,
-    responseHandler: ResponseHandler
+    responseHandler: ResponseHandler,
+    unauthorizedResponse?: (code: number | undefined) => boolean
 ): Promise<any> {
     const headers: http.OutgoingHttpHeaders = {
         Authorization: `Bearer ${authToken}`,
@@ -156,7 +195,9 @@ export async function getCommon(
     };
 
     return new Promise((resolve, reject): void => {
-        const callback = (res: http.IncomingMessage): void => responseHandler(res, resolve, reject);
+        const callback = (res: http.IncomingMessage): void =>
+            responseHandler(res, resolve, reject, unauthorizedResponse);
+
         const req: http.ClientRequest = makeRequest(`${baseUrl}${endpoint}`, options, callback);
         req.on('error', reject);
         req.end();
@@ -164,12 +205,20 @@ export async function getCommon(
 }
 
 // JSON responses
-export const get = async (baseUrl: string, authToken: string, endpoint: string): Promise<any> =>
-    getCommon(baseUrl, authToken, endpoint, handleHttpJSONResponse);
+export const get = async (
+    baseUrl: string,
+    authToken: string,
+    endpoint: string,
+    unauthorizedResponse?: (code: number | undefined) => boolean
+): Promise<any> => getCommon(baseUrl, authToken, endpoint, handleHttpJSONResponse, unauthorizedResponse);
 
 // Text responses
-export const getText = async (baseUrl: string, authToken: string, endpoint: string): Promise<any> =>
-    getCommon(baseUrl, authToken, endpoint, handleHttpTextResponse);
+export const getText = async (
+    baseUrl: string,
+    authToken: string,
+    endpoint: string,
+    unauthorizedResponse?: (code: number | undefined) => boolean
+): Promise<any> => getCommon(baseUrl, authToken, endpoint, handleHttpTextResponse, unauthorizedResponse);
 
 export interface IPutEntry {
     name: string;
@@ -187,10 +236,11 @@ export async function putForm(
     authToken: string | null,
     endpoint: string,
     entries: IPutEntry[],
-    callback?: UploadProgressCallback
+    callback?: UploadProgressCallback,
+    unauthorizedResponse?: (code: number | undefined) => boolean
 ): Promise<any> {
     const form = new FormData();
-    entries.forEach(entry => form.append(entry.name, entry.value));
+    entries.forEach((entry) => form.append(entry.name, entry.value));
 
     const agent = new https.Agent({
         rejectUnauthorized: false,
@@ -209,6 +259,7 @@ export async function putForm(
                 callback(info);
             }
         },
+        validateStatus: unauthorizedResponse,
     };
 
     try {
@@ -219,11 +270,18 @@ export async function putForm(
     }
 }
 
-export async function patch(baseUrl: string, authToken: string | null, endpoint: string, value: any): Promise<any> {
+export async function patch(
+    baseUrl: string,
+    authToken: string | null,
+    endpoint: string,
+    value: any,
+    unauthorizedResponse?: (code: number | undefined) => boolean
+): Promise<any> {
     const config = {
         headers: {
             Authorization: `Bearer ${authToken}`,
         },
+        validateStatus: unauthorizedResponse,
     };
 
     try {
@@ -234,7 +292,13 @@ export async function patch(baseUrl: string, authToken: string | null, endpoint:
     }
 }
 
-export async function put(baseUrl: string, authToken: string | null, endpoint: string, value: any): Promise<any> {
+export async function put(
+    baseUrl: string,
+    authToken: string | null,
+    endpoint: string,
+    value: any,
+    unauthorizedResponse?: (code: number | undefined) => boolean
+): Promise<any> {
     const agent = new https.Agent({
         rejectUnauthorized: false,
     });
@@ -244,6 +308,7 @@ export async function put(baseUrl: string, authToken: string | null, endpoint: s
             Authorization: `Bearer ${authToken}`,
         },
         httpsAgent: agent,
+        validateStatus: unauthorizedResponse,
     };
 
     try {
@@ -259,7 +324,12 @@ export async function put(baseUrl: string, authToken: string | null, endpoint: s
     }
 }
 
-export async function download(baseUrl: string, authToken: string | null, endpoint: string): Promise<any> {
+export async function download(
+    baseUrl: string,
+    authToken: string | null,
+    endpoint: string,
+    unauthorizedResponse?: (code: number | undefined) => boolean
+): Promise<any> {
     const agent = new https.Agent({
         rejectUnauthorized: false,
     });
@@ -270,6 +340,7 @@ export async function download(baseUrl: string, authToken: string | null, endpoi
             Authorization: `Bearer ${authToken}`,
         },
         httpsAgent: agent,
+        validateStatus: unauthorizedResponse,
     };
     try {
         const response = await axios.get(`${baseUrl}${endpoint}`, config);
@@ -283,7 +354,8 @@ export async function downloadFile(
     baseUrl: string,
     authToken: string | null,
     endpoint: string,
-    outputStream: any
+    outputStream: any,
+    unauthorizedResponse?: (code: number | undefined) => boolean
 ): Promise<any> {
     const agent = new https.Agent({
         rejectUnauthorized: false,
@@ -294,6 +366,7 @@ export async function downloadFile(
             Authorization: `Bearer ${authToken}`,
         },
         httpsAgent: agent,
+        validateStatus: unauthorizedResponse,
     };
     try {
         const response = await axios.get(`${baseUrl}${endpoint}`, config);
@@ -312,7 +385,12 @@ export async function downloadFile(
     }
 }
 
-export async function del(baseUrl: string, authToken: string, endpoint: string): Promise<void> {
+export async function del(
+    baseUrl: string,
+    authToken: string,
+    endpoint: string,
+    unauthorizedResponse?: (code: number | undefined) => boolean
+): Promise<void> {
     const headers: http.OutgoingHttpHeaders = {
         Authorization: `Bearer ${authToken}`,
     };
@@ -324,7 +402,8 @@ export async function del(baseUrl: string, authToken: string, endpoint: string):
     };
 
     return new Promise((resolve, reject): void => {
-        const callback = (res: http.IncomingMessage): void => handleHttpJSONResponse(res, resolve, reject);
+        const callback = (res: http.IncomingMessage): void =>
+            handleHttpJSONResponse(res, resolve, reject, unauthorizedResponse);
         const req: http.ClientRequest = makeRequest(`${baseUrl}${endpoint}`, options, callback);
         req.on('error', reject);
         req.end();
