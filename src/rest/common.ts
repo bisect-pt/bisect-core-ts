@@ -251,6 +251,7 @@ export async function putForm(
             : { ...form.getHeaders(), Authorization: `Bearer ${authToken}` },
         httpsAgent: agent,
         maxContentLength: Infinity,
+        maxBodyLength: Infinity,
         onUploadProgress: (progressEvent: any) => {
             const percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
             const info = { percentage: percentCompleted };
