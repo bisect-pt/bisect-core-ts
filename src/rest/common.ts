@@ -277,10 +277,15 @@ export async function patch(
     value: any,
     unauthorizedResponse?: (code: number | undefined) => boolean
 ): Promise<any> {
+    const agent = new https.Agent({
+        rejectUnauthorized: false,
+    });
+
     const config = {
         headers: {
             Authorization: `Bearer ${authToken}`,
         },
+        httpsAgent: agent,
         validateStatus: unauthorizedResponse,
     };
 
