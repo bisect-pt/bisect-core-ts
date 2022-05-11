@@ -146,7 +146,7 @@ export async function post(
 
     const headers: http.OutgoingHttpHeaders = {
         'Content-Length': Buffer.byteLength(payload),
-        'Content-Type': 'application/json;charset=UTF-8',
+        'Content-Type': 'application/json',
     };
 
     if (authToken !== null) {
