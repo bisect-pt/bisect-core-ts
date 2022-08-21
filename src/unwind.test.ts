@@ -1,6 +1,6 @@
-import { Unwinder } from '../src/unwind';
+import { Unwinder } from './unwind';
 
-it('unwind', async () => {
+it('unwinds', async () => {
     const unwinder = new Unwinder();
 
     let calls: number[] = [];
