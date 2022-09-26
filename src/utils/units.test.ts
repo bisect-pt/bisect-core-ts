@@ -22,16 +22,23 @@ const samples: TestData[] = [
         multiplier: 1,
         unit: '',
     },
+];
+
+const samples2: TestData[] = [
     {
         multiplier: 1e-3,
-        unit: 'm',
+        unit: '',
     },
     {
         multiplier: 1e-6,
-        unit: 'µ',
+        unit: 'm',
     },
     {
         multiplier: 1e-9,
+        unit: 'µ',
+    },
+    {
+        multiplier: 1e-12,
         unit: 'n',
     },
 ];
@@ -39,7 +46,17 @@ const samples: TestData[] = [
 samples.forEach(({ multiplier, unit }: TestData) => {
     it(`handles ${unit} correctly`, () => {
         expect(getValueAndUnits(123.234232 * multiplier)).toStrictEqual(['123', unit]);
+        expect(getValueAndUnits(-123.234232 * multiplier)).toStrictEqual(['-123', unit]);
         expect(getValueAndUnits(12.3234232 * multiplier)).toStrictEqual(['12.3', unit]);
+        expect(getValueAndUnits(-12.3234232 * multiplier)).toStrictEqual(['-12.3', unit]);
         expect(getValueAndUnits(1.23234232 * multiplier)).toStrictEqual(['1.23', unit]);
+        expect(getValueAndUnits(-1.23234232 * multiplier)).toStrictEqual(['-1.23', unit]);
+    });
+});
+
+samples2.forEach(({ multiplier, unit }: TestData) => {
+    it(`handles ${unit} correctly`, () => {
+        expect(getValueAndUnits(123.234232 * multiplier)).toStrictEqual(['0.12', unit]);
+        expect(getValueAndUnits(-123.234232 * multiplier)).toStrictEqual(['-0.12', unit]);
     });
 });
