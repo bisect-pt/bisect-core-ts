@@ -39,7 +39,10 @@ const samples: TestData[] = [
 samples.forEach(({ multiplier, unit }: TestData) => {
     it(`handles ${unit} correctly`, () => {
         expect(getValueAndUnits(123.234232 * multiplier)).toStrictEqual(['123', unit]);
+        expect(getValueAndUnits(-123.234232 * multiplier)).toStrictEqual(['-123', unit]);
         expect(getValueAndUnits(12.3234232 * multiplier)).toStrictEqual(['12.3', unit]);
+        expect(getValueAndUnits(-12.3234232 * multiplier)).toStrictEqual(['-12.3', unit]);
         expect(getValueAndUnits(1.23234232 * multiplier)).toStrictEqual(['1.23', unit]);
+        expect(getValueAndUnits(-1.23234232 * multiplier)).toStrictEqual(['-1.23', unit]);
     });
 });
