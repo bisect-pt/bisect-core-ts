@@ -11,32 +11,33 @@ function trimFixed(value: number): string {
 
 // Returns [value: number, unit: string]
 export function getValueAndUnits(value: number): NumberAndUnit {
-    if (Math.abs(value) >= 1e9) {
+    const v = Math.abs(value);
+    if (v >= 1e9) {
         return [trimFixed(value / 1e9), 'G'];
     }
 
-    if (Math.abs(value) >= 1e6) {
+    if (v >= 1e6) {
         return [trimFixed(value / 1e6), 'M'];
     }
 
-    if (Math.abs(value) >= 1e3) {
+    if (v >= 1e3) {
         return [trimFixed(value / 1e3), 'k'];
     }
 
-    if (Math.abs(value) >= 1 || value === 0) {
+    if (v >= 1 || value === 0) {
         return [trimFixed(value), ''];
     }
 
-    if (Math.abs(value) <= 1e-9) {
-        return [trimFixed(value * 1e9), 'n'];
+    if (v >= 1e-3) {
+        return [trimFixed(value * 1e3), 'm'];
     }
 
-    if (Math.abs(value) <= 1e-6) {
+    if (v >= 1e-6) {
         return [trimFixed(value * 1e6), 'µ'];
     }
 
-    if (Math.abs(value) <= 1e-3) {
-        return [trimFixed(value * 1e3), 'm'];
+    if (v >= 1e-9) {
+        return [trimFixed(value * 1e9), 'n'];
     }
 
     return [trimFixed(value), ''];
