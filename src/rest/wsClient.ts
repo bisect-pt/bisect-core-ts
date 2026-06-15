@@ -1,4 +1,4 @@
-import SocketIOClient from 'socket.io-client';
+import {Socket, io} from 'socket.io-client';
 import logger from '../logger';
 
 // ////////////////////////////////////////////////////////////////////////////
@@ -11,19 +11,19 @@ function handleWsConnectError(error: any): void {
     logger.error(`WebSocket connection error: ${error}`);
 }
 export default class WSCLient {
-    public readonly client: SocketIOClient.Socket;
+    public readonly client: Socket;
 
     public constructor(url: string, path: string, userId?: string) {
-        this.client = (null as unknown) as SocketIOClient.Socket;
-        this.client = SocketIOClient(url, {
+
+        this.client = io(url, {
             autoConnect: true,
             path,
             reconnection: true,
             reconnectionDelay: 500,
             reconnectionDelayMax: 2000,
-            rejectUnauthorized: false,
-            transports: ['websocket', 'polling'],
+            transports: ["websocket", "polling"],
         });
+        
         if (userId) {
             this.client.on('connect', () => {
                 this.client.emit('register', userId);

@@ -13,6 +13,7 @@ import {
     patch,
     put,
 } from './common';
+import {Socket} from 'socket.io-client';
 
 export class RestClient {
     public constructor(
@@ -61,7 +62,7 @@ export class RestClient {
     }
 
     public makeAwaiter<TResponse>(
-        ws: SocketIOClient.Socket,
+        ws: Socket,
         eventName: string,
         condition: (data: any) => TResponse | undefined,
         timeoutMs: number
