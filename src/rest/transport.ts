@@ -1,8 +1,9 @@
 import { IPutEntry, UploadProgressCallback } from './common';
 import { RestClient } from './restClient';
+import {Socket} from 'socket.io-client';
 
 export class Transport {
-    public constructor(public readonly rest: RestClient, private readonly wsGetter: () => SocketIOClient.Socket) {}
+    public constructor(public readonly rest: RestClient, private readonly wsGetter: () => Socket) {}
 
     public async get(endpoint: string) {
         return this.rest.get(endpoint);

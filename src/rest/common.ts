@@ -2,10 +2,11 @@ import FormData from 'form-data';
 import http from 'http';
 import https from 'https';
 import { StringDecoder } from 'string_decoder';
-import { createUrl, isBrowser } from '../utils/platform';
 import axios from 'axios';
 import logger from '../logger';
 import * as stream from 'stream';
+import { createUrl, isBrowser } from '../utils/platform';
+import {Socket} from 'socket.io-client';
 
 // ////////////////////////////////////////////////////////////////////////////
 
@@ -425,7 +426,7 @@ export interface IWSMessage {
 // - undefined, if timeout
 // condition should return anything other than undefined to indicate that the event is accepted.
 export function makeAwaiter<TResponse>(
-    ws: SocketIOClient.Socket,
+    ws: Socket,
     eventName: string,
     condition: (data: any) => TResponse | undefined,
     timeoutMs: number
